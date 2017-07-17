@@ -43,6 +43,12 @@
 #include "monitor/monitor.h"
 #include "qapi/error.h"
 
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #define NUM_VIRTIO_TRANSPORTS 32
 
 /* Number of external interrupt lines to configure the GIC with */
@@ -62,6 +68,7 @@
 enum {
     RANCHU_FLASH,
     RANCHU_MEM,
+    RANCHU_XTSC_MEM,
     RANCHU_CPUPERIPHS,
     RANCHU_GIC_DIST,
     RANCHU_GIC_CPU,
@@ -90,6 +97,9 @@ typedef struct VirtBoardInfo {
     int fdt_size;
     uint32_t clock_phandle;
 } VirtBoardInfo;
+
+#define XTSC_RAM_SIZE 0x08000000
+#define XTSC_CORE_COUNT 1
 
 /* Addresses and sizes of our components.
  * 0..128MB is space for a flash device so we can run bootrom code such as UEFI.
@@ -120,6 +130,7 @@ static const MemMapEntry memmap[] = {
     /* ...repeating for a total of NUM_VIRTIO_TRANSPORTS, each of that size */
     /* 0x10000000 .. 0x40000000 reserved for PCI */
     [RANCHU_MEM] = { 0x40000000, 30ULL * 1024 * 1024 * 1024 },
+    [RANCHU_XTSC_MEM] = { 0x1000000000ULL, XTSC_RAM_SIZE },
 };
 
 static const int irqmap[] = {
@@ -465,6 +476,33 @@ static void create_virtio_devices(const VirtBoardInfo *vbi, qemu_irq *pic)
     }
 }
 
+static void create_xrp_devices(const VirtBoardInfo *vbi, int devid)
+{
+    int i, n = XTSC_CORE_COUNT;
+
+    for (i = 0; i < n; ++i) {
+        hwaddr size = memmap[devid].size / n;
+        hwaddr base = memmap[devid].base + i * size;
+        char *nodename = g_strdup_printf("/xrp%d@%" PRIx64, i, base);
+
+        qemu_fdt_add_subnode(vbi->fdt, nodename);
+        qemu_fdt_setprop_cell(vbi->fdt, nodename, "#address-cells", 1);
+        qemu_fdt_setprop_cell(vbi->fdt, nodename, "#size-cells", 1);
+        qemu_fdt_setprop_string(vbi->fdt, nodename, "compatible", "cdns,xrp");
+        qemu_fdt_setprop_sized_cells(vbi->fdt, nodename, "reg",
+                                     2, 0, 2, 0,
+                                     2, base, 2, 4096,
+                                     2, base + 4096, 2, size - 4096);
+        qemu_fdt_setprop_sized_cells(vbi->fdt, nodename, "ranges",
+                                     1, 0x00000000, 2, memmap[RANCHU_MEM].base, 1, 0x10000000,
+                                     1, 0xf0000000, 2, memmap[devid].base, 1, memmap[devid].size);
+        g_free(nodename);
+        nodename = g_strdup_printf("/xrp%d@%" PRIx64 "/dsp@0", i, base);
+        qemu_fdt_add_subnode(vbi->fdt, nodename);
+        g_free(nodename);
+    }
+}
+
 static void *ranchu_dtb(const struct arm_boot_info *binfo, int *fdt_size)
 {
     const VirtBoardInfo *board = (const VirtBoardInfo *)binfo;
@@ -479,8 +517,15 @@ static void ranchu_init(MachineState *machine)
     MemoryRegion *sysmem = get_system_memory();
     int n;
     MemoryRegion *ram = g_new(MemoryRegion, 1);
+    MemoryRegion *xtsc_ram = g_new(MemoryRegion, 1);
     const char *cpu_model = machine->cpu_model;
     VirtBoardInfo *vbi;
+    static const char * const ram_name_pattern[] = {
+        "SystemRAM_L", "SharedRAM_L",
+    };
+    size_t ram_size[2] = {machine->ram_size, XTSC_RAM_SIZE, };
+    void *ram_ptr[2];
+    int i;
 
     if (!cpu_model) {
         cpu_model = "cortex-a57";
@@ -522,10 +567,55 @@ static void ranchu_init(MachineState *machine)
     }
     fdt_add_cpu_nodes(vbi);
 
-    memory_region_init_ram(ram, NULL, "ranchu.ram", machine->ram_size,
-                           &error_abort);
+    for (i = 0; i < ARRAY_SIZE(ram_name_pattern); ++i) {
+        const char *pid = getenv("XTSC_PID");
+        char ram_name_buf[100];
+        const char *ram_name = ram_name_buf;
+        int fd;
+        int rc;
+        int j;
+
+        if (pid) {
+            snprintf(ram_name_buf, sizeof(ram_name_buf), "%s.%s",
+                     ram_name_pattern[i], pid);
+        } else {
+            ram_name = ram_name_pattern[i];
+        }
+
+        for (j = 0; j < 10; ++j) {
+            fd = shm_open(ram_name, O_RDWR, 0666);
+            if (fd < 0) {
+                printf("waiting for %s...\n", ram_name);
+                sleep(1);
+            }
+        }
+        if (fd < 0) {
+            perror("shm_open");
+            abort();
+        }
+
+        rc = ftruncate(fd, ram_size[i]);
+        if (rc < 0) {
+            perror("ftruncate");
+            abort();
+        }
+
+        ram_ptr[i] = mmap(NULL, ram_size[i],
+                          PROT_READ | PROT_WRITE,
+                          MAP_SHARED, fd, 0);
+        if (ram_ptr[i] == MAP_FAILED) {
+            perror("mmap");
+            abort();
+        }
+    }
+    memory_region_init_ram_ptr(ram, NULL, "ranchu.ram", machine->ram_size, ram_ptr[0]);
     vmstate_register_ram_global(ram);
     memory_region_add_subregion(sysmem, memmap[RANCHU_MEM].base, ram);
+
+    memory_region_init_ram_ptr(xtsc_ram, NULL, "ranchu.xtsc.ram", ram_size[1], ram_ptr[1]);
+    vmstate_register_ram_global(xtsc_ram);
+    memory_region_add_subregion(sysmem, memmap[RANCHU_XTSC_MEM].base, xtsc_ram);
+    create_xrp_devices(vbi, RANCHU_XTSC_MEM);
 
     create_gic(vbi, pic);
     create_serial_device(0, vbi, pic, RANCHU_UART, "pl011",
