@@ -138,6 +138,7 @@ set(qemu2-shared_sources ""
    hw/usb/host-libusb.c
    backends/cryptodev-vhost.c
    hw/core/irq.c
+   hw/core/xtsc.c
    block/vpc.c
    block/bochs.c
    hw/usb/dev-smartcard-reader.c
