@@ -26,6 +26,7 @@
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #else
+#include <sys/wait.h>
 #include <unistd.h>
 #endif
 
@@ -898,6 +899,48 @@ int main(int argc, char** argv)
         printf("\n");
     }
 
+    char *start_xtsc = getenv("START_XTSC");
+
+    if (start_xtsc) {
+        pid_t pid[2];
+
+        pid[0] = fork();
+        if (pid[0]) {
+            char pid_str[sizeof(pid[0]) * 3 + 1];
+
+            sprintf(pid_str, "%ld", (long)pid[0]);
+            setenv("XTSC_PID", pid_str, 1);
+        } else {
+            char *argv[] = {start_xtsc, NULL};
+
+            execv(start_xtsc, argv);
+            perror("Couldn't launch start_xtsc");
+            return 1;
+        }
+
+        pid[1] = fork();
+        if (pid[1]) {
+            const char *process[] = {
+                "XTSC", "QEMU"
+            };
+            int status;
+            pid_t t = ::wait(&status);
+
+            printf("%s terminated, terminating the %s\n",
+                   process[t == pid[1]], process[t == pid[0]]);
+
+            if (t == pid[0]) {
+                t = pid[1];
+            } else {
+                t = pid[0];
+            }
+            kill(t, SIGTERM);
+            ::wait(&status);
+            return 0;
+        } else {
+            safe_execv(emulatorPath, argv);
+        }
+    }
     // Launch it with the same set of options !
     // Note that on Windows, the first argument must _not_ be quoted or
     // Windows will fail to find the program.
