@@ -62,4 +62,9 @@
 #define GOLDFISH_ROTARY_IOMEM_SIZE    0x00001000
 #define GOLDFISH_ROTARY_IRQ           23
 
+/* goldfish XTSC shared memory */
+#define GOLDFISH_XTSC_IOMEM_BASE      0xf0000000
+#define GOLDFISH_XTSC_IOMEM_SIZE      0x04000000
+#define GOLDFISH_XTSC_IRQ             16
+
 #endif  /* !ACPI_GOLDFISH_DEFS_H */
