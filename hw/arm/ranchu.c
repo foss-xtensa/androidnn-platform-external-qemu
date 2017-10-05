@@ -29,6 +29,7 @@
 #include "hw/arm/primecell.h"
 #include "hw/char/pl011.h"
 #include "hw/devices.h"
+#include "hw/xtsc.h"
 #include "net/net.h"
 #include "sysemu/device_tree.h"
 #include "sysemu/ranchu.h"
@@ -568,45 +569,8 @@ static void ranchu_init(MachineState *machine)
     fdt_add_cpu_nodes(vbi);
 
     for (i = 0; i < ARRAY_SIZE(ram_name_pattern); ++i) {
-        const char *pid = getenv("XTSC_PID");
-        char ram_name_buf[100];
-        const char *ram_name = ram_name_buf;
-        int fd;
-        int rc;
-        int j;
-
-        if (pid) {
-            snprintf(ram_name_buf, sizeof(ram_name_buf), "%s.%s",
-                     ram_name_pattern[i], pid);
-        } else {
-            ram_name = ram_name_pattern[i];
-        }
-
-        for (j = 0; j < 10; ++j) {
-            fd = shm_open(ram_name, O_RDWR, 0666);
-            if (fd < 0) {
-                printf("waiting for %s...\n", ram_name);
-                sleep(1);
-            }
-        }
-        if (fd < 0) {
-            perror("shm_open");
-            abort();
-        }
-
-        rc = ftruncate(fd, ram_size[i]);
-        if (rc < 0) {
-            perror("ftruncate");
-            abort();
-        }
-
-        ram_ptr[i] = mmap(NULL, ram_size[i],
-                          PROT_READ | PROT_WRITE,
-                          MAP_SHARED, fd, 0);
-        if (ram_ptr[i] == MAP_FAILED) {
-            perror("mmap");
-            abort();
-        }
+        ram_ptr[i] = xtsc_open_shared_memory(ram_name_pattern[i],
+                                             ram_size[i]);
     }
     memory_region_init_ram_ptr(ram, NULL, "ranchu.ram", machine->ram_size, ram_ptr[0]);
     vmstate_register_ram_global(ram);

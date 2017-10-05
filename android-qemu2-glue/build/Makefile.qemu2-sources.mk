@@ -416,6 +416,7 @@ QEMU2_TARGET_SOURCES := \
     hw/char/virtio-serial-bus.c \
     hw/core/generic-loader.c \
     hw/core/nmi.c \
+    hw/core/xtsc.c \
     hw/cpu/core.c \
     hw/display/vga.c \
     hw/display/virtio-gpu-3d.c \
