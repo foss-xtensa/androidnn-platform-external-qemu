@@ -440,6 +440,7 @@ QEMU2_TARGET_SOURCES := \
     hw/core/generic-loader.c \
     hw/core/nmi.c \
     hw/core/null-machine.c \
+    hw/core/xtsc.c \
     hw/cpu/core.c \
     hw/display/vga.c \
     hw/display/virtio-gpu-3d.c \
