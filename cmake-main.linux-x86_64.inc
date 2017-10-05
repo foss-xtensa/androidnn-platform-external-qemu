@@ -1210,6 +1210,7 @@ set(qemu-system-aarch64_sources ""
    hw/misc/goldfish_pipe.c
    hw/misc/goldfish_sync.c
    hw/misc/goldfish_pstore.c
+   hw/misc/goldfish_xtsc.c
    hw/misc/mmio_interface.c
    hw/misc/msf2-sysreg.c
    hw/net/e1000x_common.c
@@ -1573,6 +1574,7 @@ set(qemu-system-arm_sources ""
    hw/misc/goldfish_pipe.c
    hw/misc/goldfish_sync.c
    hw/misc/goldfish_pstore.c
+   hw/misc/goldfish_xtsc.c
    hw/misc/mmio_interface.c
    hw/misc/msf2-sysreg.c
    hw/net/e1000x_common.c
@@ -1869,6 +1871,7 @@ set(qemu-system-i386_sources ""
    hw/misc/goldfish_pipe.c
    hw/misc/goldfish_sync.c
    hw/misc/goldfish_pstore.c
+   hw/misc/goldfish_xtsc.c
    hw/misc/mmio_interface.c
    hw/net/e1000x_common.c
    hw/net/e1000.c
@@ -2066,6 +2069,7 @@ set(qemu-system-mips64el_sources ""
    hw/misc/goldfish_pipe.c
    hw/misc/goldfish_sync.c
    hw/misc/goldfish_pstore.c
+   hw/misc/goldfish_xtsc.c
    hw/misc/mmio_interface.c
    hw/net/e1000x_common.c
    hw/net/e1000.c
@@ -2231,6 +2235,7 @@ set(qemu-system-mipsel_sources ""
    hw/misc/goldfish_pipe.c
    hw/misc/goldfish_sync.c
    hw/misc/goldfish_pstore.c
+   hw/misc/goldfish_xtsc.c
    hw/misc/mmio_interface.c
    hw/net/e1000x_common.c
    hw/net/e1000.c
@@ -2386,6 +2391,7 @@ set(qemu-system-x86_64_sources ""
    hw/misc/goldfish_pipe.c
    hw/misc/goldfish_sync.c
    hw/misc/goldfish_pstore.c
+   hw/misc/goldfish_xtsc.c
    hw/misc/mmio_interface.c
    hw/net/e1000x_common.c
    hw/net/e1000.c
