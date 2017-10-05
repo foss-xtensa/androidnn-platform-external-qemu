@@ -62,3 +62,4 @@ obj-$(CONFIG_GOLDFISH) += goldfish_battery.o
 obj-$(CONFIG_GOLDFISH) += goldfish_pipe.o
 obj-$(CONFIG_GOLDFISH) += goldfish_sync.o
 obj-$(CONFIG_GOLDFISH) += goldfish_pstore.o
+obj-$(CONFIG_GOLDFISH) += goldfish_xtsc.o

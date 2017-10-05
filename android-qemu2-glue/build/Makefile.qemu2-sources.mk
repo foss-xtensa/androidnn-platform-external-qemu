@@ -455,6 +455,7 @@ QEMU2_TARGET_SOURCES := \
     hw/misc/goldfish_pipe.c \
     hw/misc/goldfish_pstore.c \
     hw/misc/goldfish_sync.c \
+    hw/misc/goldfish_xtsc.c \
     hw/net/vhost_net.c \
     hw/net/virtio-net.c \
     hw/scsi/virtio-scsi-dataplane.c \
