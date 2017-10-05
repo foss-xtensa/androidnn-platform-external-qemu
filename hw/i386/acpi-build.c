@@ -1236,6 +1236,11 @@ static void build_goldfish_aml(Aml *table)
                               GOLDFISH_ROTARY_IOMEM_SIZE,
                               GOLDFISH_ROTARY_IRQ);
 
+    build_goldfish_device_aml(scope, "GXSC", "CXRP0001", "goldfish XTSC",
+                              GOLDFISH_XTSC_IOMEM_BASE,
+                              GOLDFISH_XTSC_IOMEM_SIZE,
+                              GOLDFISH_XTSC_IRQ);
+
     build_android_dt_aml(scope, "ANDT", "ANDR0001", "android device tree");
     aml_append(table, scope);
 }
