@@ -40,6 +40,25 @@ static Property goldfish_xtsc_properties[] = {
     DEFINE_PROP_END_OF_LIST(),
 };
 
+static Object *obj;
+
+Object *goldfish_xtsc_device(void)
+{
+    return obj;
+}
+
+hwaddr goldfish_xtsc_get_addr(Object *obj)
+{
+  goldfish_xtsc *s = GOLDFISH_XTSC(obj);
+  return s->addr;
+}
+
+uint64_t goldfish_xtsc_get_size(Object *obj)
+{
+  goldfish_xtsc *s = GOLDFISH_XTSC(obj);
+  return s->size;
+}
+
 static void goldfish_xtsc_realize(DeviceState *dev, Error **errp) {
   goldfish_xtsc *s = GOLDFISH_XTSC(dev);
 
@@ -50,12 +69,14 @@ static void goldfish_xtsc_realize(DeviceState *dev, Error **errp) {
 
   // Ok, now we just need to move it to the right physical address.
   memory_region_add_subregion(get_system_memory(), s->addr, &s->memory);
+  obj = OBJECT(dev);
 }
 
 static void goldfish_xtsc_unrealize(DeviceState *dev, Error **errp) {
   goldfish_xtsc *s = GOLDFISH_XTSC(dev);
 
   memory_region_del_subregion(get_system_memory(), &s->memory);
+  obj = NULL;
 }
 
 static void goldfish_dev_init(Object *obj) {
