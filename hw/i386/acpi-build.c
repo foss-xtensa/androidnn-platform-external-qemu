@@ -67,6 +67,7 @@
 #ifdef CONFIG_ANDROID
 #include "android/globals.h"
 #include "hw/acpi/goldfish_defs.h"
+#include "hw/misc/goldfish_xtsc.h"
 #endif
 
 /* These are used to size the ACPI tables for -M pc-i440fx-1.7 and
@@ -1236,10 +1237,17 @@ static void build_goldfish_aml(Aml *table)
                               GOLDFISH_ROTARY_IOMEM_SIZE,
                               GOLDFISH_ROTARY_IRQ);
 
-    build_goldfish_device_aml(scope, "GXSC", "CXRP0001", "goldfish XTSC",
-                              GOLDFISH_XTSC_IOMEM_BASE,
-                              GOLDFISH_XTSC_IOMEM_SIZE,
-                              GOLDFISH_XTSC_IRQ);
+    {
+        Object *dev;
+
+        dev = goldfish_xtsc_device();
+        if (dev) {
+            build_goldfish_device_aml(scope, "GXSC", "CXRP0001", "goldfish XTSC",
+                                      goldfish_xtsc_get_addr(dev),
+                                      goldfish_xtsc_get_size(dev),
+                                      0);
+        }
+    }
 
     build_android_dt_aml(scope, "ANDT", "ANDR0001", "android device tree");
     aml_append(table, scope);
