@@ -105,7 +105,8 @@ typedef struct VirtBoardInfo {
 /* Addresses and sizes of our components.
  * 0..128MB is space for a flash device so we can run bootrom code such as UEFI.
  * 128MB..256MB is used for miscellaneous device I/O.
- * 256MB..1GB is reserved for possible future PCI support (ie where the
+ * 256MB..384MB is used for XRP shared memory
+ * 384MB..1GB is reserved for possible future PCI support (ie where the
  * PCI memory window will go if we add a PCI host controller).
  * 1GB and up is RAM (which may happily spill over into the
  * high memory region beyond 4GB).
@@ -128,10 +129,10 @@ static const MemMapEntry memmap[] = {
     [RANCHU_GOLDFISH_EVDEV] = { 0x9040000, 0x1000 },
     [RANCHU_MMIO] = { 0xa000000, 0x200 },
     [RANCHU_GOLDFISH_PIPE] = {0xa010000, 0x2000 },
+    [RANCHU_XTSC_MEM] = { 0x10000000, XTSC_RAM_SIZE },
     /* ...repeating for a total of NUM_VIRTIO_TRANSPORTS, each of that size */
     /* 0x10000000 .. 0x40000000 reserved for PCI */
     [RANCHU_MEM] = { 0x40000000, 30ULL * 1024 * 1024 * 1024 },
-    [RANCHU_XTSC_MEM] = { 0x1000000000ULL, XTSC_RAM_SIZE },
 };
 
 static const int irqmap[] = {
