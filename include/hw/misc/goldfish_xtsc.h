@@ -17,11 +17,13 @@
 #define GOLDFISH_XTSC_ADDR_PROP "addr"
 #define GOLDFISH_XTSC_SIZE_PROP "size"
 #define GOLDFISH_XTSC_NAME_PROP "name"
+#define GOLDFISH_XTSC_COMM_ADDR_PROP "comm_addr"
+#define GOLDFISH_XTSC_RESERVED_SIZE_PROP "reserved_size"
 
 struct Object;
-Object *goldfish_xtsc_device(void);
-hwaddr goldfish_xtsc_get_addr(Object *obj);
-uint64_t goldfish_xtsc_get_size(Object *obj);
+Object **goldfish_xtsc_devices(void);
+hwaddr goldfish_xtsc_get_addr(Object *obj, int i);
+uint64_t goldfish_xtsc_get_size(Object *obj, int i);
 
 #endif /* _HW_GOLDFISH_XTSC_H */
 
