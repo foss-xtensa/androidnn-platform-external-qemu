@@ -1196,14 +1196,49 @@ static void build_goldfish_aml(Aml *table)
                               GOLDFISH_ROTARY_IRQ);
 
     {
-        Object *dev;
+        Object **xtsc_dev;
 
-        dev = goldfish_xtsc_device();
-        if (dev) {
-            build_goldfish_device_aml(scope, "GXSC", "CXRP0001", "goldfish XTSC",
-                                      goldfish_xtsc_get_addr(dev),
-                                      goldfish_xtsc_get_size(dev),
-                                      0);
+        xtsc_dev = goldfish_xtsc_devices();
+        if (xtsc_dev) {
+            unsigned i;
+
+            for (i = 0; xtsc_dev[i]; ++i) {
+                char name[20];
+                int version = 1;
+                Aml *dev = aml_device("GXS%d", i);
+                Aml *crs;
+
+                if (goldfish_xtsc_get_addr(xtsc_dev[i], 1) &&
+                    goldfish_xtsc_get_size(xtsc_dev[i], 1)) {
+                    version = 0;
+                }
+
+                snprintf(name, sizeof(name), "goldfish XTSC %d", i);
+
+                aml_append(dev, aml_name_decl("_HID", aml_string("CXRP%04d", version)));
+                aml_append(dev, aml_name_decl("_STR", aml_unicode(name)));
+
+                crs = aml_resource_template();
+                if (version == 0) {
+                    uint64_t rsize = goldfish_xtsc_get_size(xtsc_dev[i], 1);
+
+                    aml_append(crs, aml_memory32_fixed(goldfish_xtsc_get_addr(xtsc_dev[i], 1),
+                                                       4096,
+                                                       AML_READ_WRITE));
+                    aml_append(crs, aml_memory32_fixed(goldfish_xtsc_get_addr(xtsc_dev[i], 1),
+                                                       4096,
+                                                       AML_READ_WRITE));
+                    aml_append(crs, aml_memory32_fixed(goldfish_xtsc_get_addr(xtsc_dev[i], 0) + rsize,
+                                                       goldfish_xtsc_get_size(xtsc_dev[i], 0) - rsize,
+                                                       AML_READ_WRITE));
+                } else if (version == 1) {
+                    aml_append(crs, aml_memory32_fixed(goldfish_xtsc_get_addr(xtsc_dev[i], 0),
+                                                       goldfish_xtsc_get_size(xtsc_dev[i], 0),
+                                                       AML_READ_WRITE));
+                }
+                aml_append(dev, aml_name_decl("_CRS", crs));
+                aml_append(scope, dev);
+            }
         }
     }
     if (android_qemu_mode) {
