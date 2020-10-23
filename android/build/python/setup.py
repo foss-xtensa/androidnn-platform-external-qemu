@@ -50,7 +50,7 @@ setuptools.setup(
         "requests==2.21.0",
         "absl-py==0.6.1",
         "certifi==2019.3.9",
-        "urllib3==1.24.1",
+        "urllib3==1.24.2",
         "idna==2.8",
         "chardet==3.0.4",
     ],
