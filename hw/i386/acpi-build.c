@@ -1207,24 +1207,38 @@ static void build_goldfish_aml(Aml *table)
                 int version = 1;
                 Aml *dev = aml_device("GXS%d", i);
                 Aml *crs;
+                const char *hid_name[] = {
+                    "CXRP0000",
+                    "CXRP0001",
+                    "CXRS0000",
+                };
 
                 if (goldfish_xtsc_get_addr(xtsc_dev[i], 1) &&
                     goldfish_xtsc_get_size(xtsc_dev[i], 1)) {
                     version = 0;
                 }
+                if (goldfish_xtsc_get_addr(xtsc_dev[i], 2)) {
+                    version = 2;
+                }
 
                 snprintf(name, sizeof(name), "goldfish XTSC %d", i);
 
-                aml_append(dev, aml_name_decl("_HID", aml_string("CXRP%04d", version)));
+                aml_append(dev, aml_name_decl("_HID", aml_string(hid_name[version])));
                 aml_append(dev, aml_name_decl("_STR", aml_unicode(name)));
 
                 crs = aml_resource_template();
-                if (version == 0) {
+                if (version == 0 || version == 2) {
                     uint64_t rsize = goldfish_xtsc_get_size(xtsc_dev[i], 1);
 
-                    aml_append(crs, aml_memory32_fixed(goldfish_xtsc_get_addr(xtsc_dev[i], 1),
-                                                       4096,
-                                                       AML_READ_WRITE));
+                    if (version == 2) {
+                        aml_append(crs, aml_memory32_fixed(goldfish_xtsc_get_addr(xtsc_dev[i], 2),
+                                                           goldfish_xtsc_get_size(xtsc_dev[i], 2),
+                                                           AML_READ_WRITE));
+                    } else {
+                        aml_append(crs, aml_memory32_fixed(goldfish_xtsc_get_addr(xtsc_dev[i], 1),
+                                                           4096,
+                                                           AML_READ_WRITE));
+                    }
                     aml_append(crs, aml_memory32_fixed(goldfish_xtsc_get_addr(xtsc_dev[i], 1),
                                                        4096,
                                                        AML_READ_WRITE));
