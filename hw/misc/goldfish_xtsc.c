@@ -42,6 +42,8 @@ typedef struct goldfish_xtsc {
     char *name;
     hwaddr comm_addr;/* Communication area address */
     uint64_t reserved_size;
+    hwaddr dsp_irq_addr;
+    uint32_t dsp_irq;
 } goldfish_xtsc;
 
 static Property goldfish_xtsc_properties[] = {
@@ -50,6 +52,8 @@ static Property goldfish_xtsc_properties[] = {
     DEFINE_PROP_STRING(GOLDFISH_XTSC_NAME_PROP, goldfish_xtsc, name),
     DEFINE_PROP_UINT64(GOLDFISH_XTSC_COMM_ADDR_PROP, goldfish_xtsc, comm_addr, 0),
     DEFINE_PROP_SIZE(GOLDFISH_XTSC_RESERVED_SIZE_PROP, goldfish_xtsc, reserved_size, 0),
+    DEFINE_PROP_UINT64(GOLDFISH_XTSC_DSP_IRQ_ADDR_PROP, goldfish_xtsc, dsp_irq_addr, 0),
+    DEFINE_PROP_UINT32(GOLDFISH_XTSC_DSP_IRQ_PROP, goldfish_xtsc, dsp_irq, 0),
     DEFINE_PROP_END_OF_LIST(),
 };
 
@@ -77,6 +81,9 @@ hwaddr goldfish_xtsc_get_addr(Object *obj, int i)
     case 1:
         return s->comm_addr;
 
+    case 2:
+        return s->dsp_irq_addr;
+
     default:
         g_assert_not_reached();
     }
@@ -92,6 +99,9 @@ uint64_t goldfish_xtsc_get_size(Object *obj, int i)
 
     case 1:
         return s->reserved_size;
+
+    case 2:
+        return s->dsp_irq;
 
     default:
         g_assert_not_reached();
