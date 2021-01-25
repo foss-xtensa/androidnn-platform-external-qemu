@@ -19,6 +19,8 @@
 #define GOLDFISH_XTSC_NAME_PROP "name"
 #define GOLDFISH_XTSC_COMM_ADDR_PROP "comm_addr"
 #define GOLDFISH_XTSC_RESERVED_SIZE_PROP "reserved_size"
+#define GOLDFISH_XTSC_DSP_IRQ_ADDR_PROP "dsp_irq_addr"
+#define GOLDFISH_XTSC_DSP_IRQ_PROP "dsp_irq"
 
 struct Object;
 Object **goldfish_xtsc_devices(void);
