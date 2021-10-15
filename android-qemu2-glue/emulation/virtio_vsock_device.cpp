@@ -802,6 +802,8 @@ private:
                 } break;
 
                 default:
+                    //fprintf(stderr, "%s:%d {src_port=%u dst_port=%u} unexpected dst_port\n",
+                    //        __func__, __LINE__, request->src_port, request->dst_port);
                     derror("%s: {src_port=%u dst_port=%u} unexpected dst_port",
                            __func__, request->src_port, request->dst_port);
 
