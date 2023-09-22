@@ -1028,6 +1028,7 @@ hw/misc/goldfish_battery.c
 hw/misc/goldfish_pipe.c
 hw/misc/goldfish_pstore.c
 hw/misc/goldfish_sync.c
+hw/misc/goldfish_xtsc.c
 hw/misc/imx25_ccm.c
 hw/misc/imx2_wdt.c
 hw/misc/imx31_ccm.c
@@ -1382,6 +1383,7 @@ hw/misc/goldfish_battery.c
 hw/misc/goldfish_pipe.c
 hw/misc/goldfish_pstore.c
 hw/misc/goldfish_sync.c
+hw/misc/goldfish_xtsc.c
 hw/misc/imx25_ccm.c
 hw/misc/imx2_wdt.c
 hw/misc/imx31_ccm.c
@@ -1622,6 +1624,7 @@ hw/misc/goldfish_battery.c
 hw/misc/goldfish_pipe.c
 hw/misc/goldfish_pstore.c
 hw/misc/goldfish_sync.c
+hw/misc/goldfish_xtsc.c
 hw/misc/hyperv_testdev.c
 hw/misc/ivshmem.c
 hw/misc/mmio_interface.c
@@ -1804,6 +1807,7 @@ hw/misc/goldfish_battery.c
 hw/misc/goldfish_pipe.c
 hw/misc/goldfish_pstore.c
 hw/misc/goldfish_sync.c
+hw/misc/goldfish_xtsc.c
 hw/misc/hyperv_testdev.c
 hw/misc/ivshmem.c
 hw/misc/mmio_interface.c
