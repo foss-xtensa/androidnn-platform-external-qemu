@@ -170,6 +170,7 @@ hw/core/bus.c
 hw/core/fw-path-provider.c
 hw/core/hotplug.c
 hw/core/irq.c
+hw/core/xtsc.c
 hw/core/loader.c
 hw/core/machine.c
 hw/core/nmi.c
